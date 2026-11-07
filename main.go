@@ -20,6 +20,7 @@ func main() {
 		conn, err := ln.Accept()
 		if err != nil {
 			log.Print("Failed to accept connection: ", err)
+			continue
 		}
 		log.Println("Accept new connection!")
 
