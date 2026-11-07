@@ -51,3 +51,19 @@ func TestStorageExists(t *testing.T) {
 		t.Errorf("store.Exists(\"key\") = false, want = true")
 	}
 }
+
+func TestStorageDump(t *testing.T) {
+	store := New()
+	store.store["key"] = "value"
+
+	tmp := store.Dump()
+
+	if tmp["key"] != "value" {
+		t.Errorf("store.Dump() with key = key, get = %s, want = value", tmp["key"])
+	}
+
+	tmp["key"] = "v"
+	if store.store["key"] == "v" {
+		t.Errorf("store.Dump() change value by key, changed original")
+	}
+}

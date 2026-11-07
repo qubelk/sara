@@ -76,9 +76,15 @@ func Handler(conn net.Conn, store *storage.Storage) {
 				break
 			}
 
-			store.Del(args...)
+			deleted := store.Del(args...)
+			for k, ok := range deleted {
+				if ok {
+					fmt.Fprintf(writer, "%s: Ok\n", k)
+				} else {
+					fmt.Fprintf(writer, "%s: (none)\n", k)
+				}
+			}
 
-			writer.WriteString("Ok\n")
 			writer.Flush()
 
 		case "EXISTS":
@@ -91,6 +97,14 @@ func Handler(conn net.Conn, store *storage.Storage) {
 			exists := store.Exists(args...)
 			for k, v := range exists {
 				fmt.Fprintf(writer, "%s: %v\n", k, v)
+			}
+
+			writer.Flush()
+
+		case "DUMP":
+			tmp := store.Dump()
+			for k, v := range tmp {
+				fmt.Fprintf(writer, "%s: %s\n", k, v)
 			}
 
 			writer.Flush()
