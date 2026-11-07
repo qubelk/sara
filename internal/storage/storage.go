@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"maps"
 	"sync"
 )
 
@@ -36,13 +37,19 @@ func (s *Storage) Get(keys ...string) map[string]string {
 	return tmp
 }
 
-func (s *Storage) Del(keys ...string) {
+func (s *Storage) Del(keys ...string) map[string]bool {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
+	tmp := make(map[string]bool)
+
 	for _, key := range keys {
+		_, ok := s.store[key]
 		delete(s.store, key)
+		tmp[key] = ok
 	}
+
+	return tmp
 }
 
 func (s *Storage) Exists(keys ...string) map[string]bool {
@@ -55,6 +62,16 @@ func (s *Storage) Exists(keys ...string) map[string]bool {
 		_, ok := s.store[key]
 		tmp[key] = ok
 	}
+
+	return tmp
+}
+
+func (s *Storage) Dump() map[string]string {
+	s.mtx.RLock()
+	defer s.mtx.RUnlock()
+
+	tmp := make(map[string]string)
+	maps.Copy(tmp, s.store)
 
 	return tmp
 }
