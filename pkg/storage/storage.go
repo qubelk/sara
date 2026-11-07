@@ -34,3 +34,19 @@ func (s *Storage) Get(key string) string {
 
 	return value
 }
+
+func (s *Storage) Del(key string) {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	delete(s.store, key)
+}
+
+func (s *Storage) Exists(key string) bool {
+	s.mtx.RLock()
+	defer s.mtx.RUnlock()
+
+	_, ok := s.store[key]
+
+	return ok
+}
