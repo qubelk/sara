@@ -17,7 +17,7 @@ func TestStorageGet(t *testing.T) {
 	store.store["key"] = "value"
 	v := store.Get("key")
 
-	if v != "value" {
+	if v["key"] != "value" {
 		t.Errorf("store.Get(\"key\") = %s, want = value", v)
 	}
 }
@@ -26,7 +26,7 @@ func TestStorageGetOnNotExists(t *testing.T) {
 	store := New()
 	v := store.Get("key")
 
-	if v != "" {
+	if v["key"] != "" {
 		t.Errorf("store.Get(\"key\") = %s, want = \"\"", v)
 	}
 }
@@ -45,7 +45,9 @@ func TestStorageExists(t *testing.T) {
 	store := New()
 	store.store["key"] = "value"
 
-	if !store.Exists("key") {
+	tmp := store.Exists("key")
+
+	if tmp["key"] != true {
 		t.Errorf("store.Exists(\"key\") = false, want = true")
 	}
 }
