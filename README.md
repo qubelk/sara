@@ -29,4 +29,7 @@ Check key on exists
 
 Commands `DEL` and `EXISTS` also work with many keys.
 
+`DUMP`
+Prints all keys and values
+
 `BYE`/`QUIT` for close connection
