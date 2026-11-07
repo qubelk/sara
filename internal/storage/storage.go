@@ -35,6 +35,24 @@ func (s *Storage) Get(key string) string {
 	return value
 }
 
+func (s *Storage) GetMany(keys ...string) map[string]string {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	tmp := make(map[string]string)
+
+	for _, key := range keys {
+		value, ok := s.store[key]
+		if !ok {
+			tmp[key] = "(none)"
+		}
+
+		tmp[key] = value
+	}
+
+	return tmp
+}
+
 func (s *Storage) Del(key string) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()

@@ -35,6 +35,10 @@ func Handler(conn net.Conn, store *storage.Storage) {
 			writer.WriteString("PONG\n")
 			writer.Flush()
 
+		case "HELLO":
+			writer.WriteString("HI\n")
+			writer.Flush()
+
 		case "SET":
 			if len(args) < 2 {
 				writer.WriteString("Err: SET command must have 2 args, like SET key value\n")
@@ -53,13 +57,16 @@ func Handler(conn net.Conn, store *storage.Storage) {
 				break
 			}
 
-			v := store.Get(args[0])
-			if v == "" {
-				writer.WriteString("(none)\n")
-			} else {
-				fmt.Fprintf(writer, "%s\n", v)
+			values := store.GetMany(args...)
+
+			for k, v := range values {
+				fmt.Fprintf(writer, "%s: %s\n", k, v)
 			}
 
+			writer.Flush()
+
+		default:
+			fmt.Fprintf(writer, "Err: Unknown command %s\n", fields[0])
 			writer.Flush()
 		}
 	}
