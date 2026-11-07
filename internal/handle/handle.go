@@ -57,13 +57,48 @@ func Handler(conn net.Conn, store *storage.Storage) {
 				break
 			}
 
-			values := store.GetMany(args...)
+			values := store.Get(args...)
 
 			for k, v := range values {
-				fmt.Fprintf(writer, "%s: %s\n", k, v)
+				if v == "" {
+					fmt.Fprintf(writer, "%s: (none)\n", k)
+				} else {
+					fmt.Fprintf(writer, "%s: %s\n", k, v)
+				}
 			}
 
 			writer.Flush()
+
+		case "DEL":
+			if len(args) == 0 {
+				writer.WriteString("Err: DEL command must have at least 1 arg, like DEL key\n")
+				writer.Flush()
+				break
+			}
+
+			store.Del(args...)
+
+			writer.WriteString("Ok\n")
+			writer.Flush()
+
+		case "EXISTS":
+			if len(args) == 0 {
+				writer.WriteString("Err: EXISTS command must have at least 1 arg, like EXISTS key\n")
+				writer.Flush()
+				break
+			}
+
+			exists := store.Exists(args...)
+			for k, v := range exists {
+				fmt.Fprintf(writer, "%s: %v\n", k, v)
+			}
+
+			writer.Flush()
+
+		case "BYE", "QUIT":
+			writer.WriteString("BYE\n")
+			writer.Flush()
+			conn.Close()
 
 		default:
 			fmt.Fprintf(writer, "Err: Unknown command %s\n", fields[0])

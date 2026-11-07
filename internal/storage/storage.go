@@ -23,48 +23,38 @@ func (s *Storage) Set(key, value string) {
 	s.store[key] = value
 }
 
-func (s *Storage) Get(key string) string {
-	s.mtx.RLock()
-	defer s.mtx.RUnlock()
-
-	value, ok := s.store[key]
-	if !ok {
-		return ""
-	}
-
-	return value
-}
-
-func (s *Storage) GetMany(keys ...string) map[string]string {
+func (s *Storage) Get(keys ...string) map[string]string {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
 	tmp := make(map[string]string)
 
 	for _, key := range keys {
-		value, ok := s.store[key]
-		if !ok {
-			tmp[key] = "(none)"
-		}
-
-		tmp[key] = value
+		tmp[key] = s.store[key]
 	}
 
 	return tmp
 }
 
-func (s *Storage) Del(key string) {
+func (s *Storage) Del(keys ...string) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
-	delete(s.store, key)
+	for _, key := range keys {
+		delete(s.store, key)
+	}
 }
 
-func (s *Storage) Exists(key string) bool {
+func (s *Storage) Exists(keys ...string) map[string]bool {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 
-	_, ok := s.store[key]
+	tmp := make(map[string]bool)
 
-	return ok
+	for _, key := range keys {
+		_, ok := s.store[key]
+		tmp[key] = ok
+	}
+
+	return tmp
 }
