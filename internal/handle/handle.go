@@ -17,12 +17,6 @@ func Handler(conn net.Conn, store *storage.Storage) {
 	writer := bufio.NewWriter(conn)
 
 	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(writer, "Failed to scan input: %v", err)
-			writer.Flush()
-			continue
-		}
-
 		line := scanner.Text()
 		fields := strings.Fields(line)
 		if len(fields) == 0 {
@@ -127,6 +121,10 @@ func Handler(conn net.Conn, store *storage.Storage) {
 
 		case "DUMP":
 			tmp := store.Dump()
+			if len(tmp) == 0 {
+				writer.WriteString("(none)\n")
+			}
+
 			for k, v := range tmp {
 				fmt.Fprintf(writer, "%s: %s\n", k, v.Value)
 			}
@@ -142,5 +140,10 @@ func Handler(conn net.Conn, store *storage.Storage) {
 			fmt.Fprintf(writer, "Err: Unknown command %s\n", fields[0])
 			writer.Flush()
 		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(writer, "Failed to scan input: %v", err)
+		writer.Flush()
 	}
 }
