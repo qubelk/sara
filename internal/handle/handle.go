@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"sara/internal/storage"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func Handler(conn net.Conn, store *storage.Storage) {
@@ -41,12 +43,30 @@ func Handler(conn net.Conn, store *storage.Storage) {
 
 		case "SET":
 			if len(args) < 2 {
-				writer.WriteString("Err: SET command must have 2 args, like SET key value\n")
+				writer.WriteString("Err: SET command must have at least 2 args, like SET key value\n")
 				writer.Flush()
 				break
 			}
 
-			store.Set(args[0], args[1])
+			var ttl time.Duration
+			if len(args) >= 4 && strings.ToUpper(args[2]) == "EX" {
+				seconds, err := strconv.Atoi(args[3])
+				if err != nil {
+					writer.WriteString("Err: Expect number of seconds after EX\n")
+					writer.Flush()
+					break
+				}
+
+				if seconds <= 0 {
+					writer.WriteString("Err: Time to Life cannot be negative or zero\n")
+					writer.Flush()
+					break
+				}
+
+				ttl = time.Duration(seconds) * time.Second
+			}
+
+			store.Set(args[0], args[1], ttl)
 			writer.WriteString("Ok\n")
 			writer.Flush()
 
@@ -60,10 +80,10 @@ func Handler(conn net.Conn, store *storage.Storage) {
 			values := store.Get(args...)
 
 			for k, v := range values {
-				if v == "" {
+				if v.Value == "" {
 					fmt.Fprintf(writer, "%s: (none)\n", k)
 				} else {
-					fmt.Fprintf(writer, "%s: %s\n", k, v)
+					fmt.Fprintf(writer, "%s: %s\n", k, v.Value)
 				}
 			}
 
@@ -104,7 +124,7 @@ func Handler(conn net.Conn, store *storage.Storage) {
 		case "DUMP":
 			tmp := store.Dump()
 			for k, v := range tmp {
-				fmt.Fprintf(writer, "%s: %s\n", k, v)
+				fmt.Fprintf(writer, "%s: %s\n", k, v.Value)
 			}
 
 			writer.Flush()

@@ -7,8 +7,8 @@ import (
 )
 
 type item struct {
-	value      string
-	expireTime time.Time
+	Value      string
+	ExpireTime time.Time
 }
 
 type Storage struct {
@@ -33,8 +33,8 @@ func (s *Storage) Set(key, value string, ttl time.Duration) {
 	}
 
 	s.store[key] = item{
-		value:      value,
-		expireTime: expireTime,
+		Value:      value,
+		ExpireTime: expireTime,
 	}
 }
 

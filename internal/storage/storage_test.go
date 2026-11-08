@@ -11,22 +11,22 @@ func TestStorageSet(t *testing.T) {
 
 	item := store.store["key"]
 
-	if item.value != "value" {
-		t.Errorf("store.Set(\"test\", \"value\"), get from store = %s, want = value", item.value)
+	if item.Value != "value" {
+		t.Errorf("store.Set(\"test\", \"value\"), get from store = %s, want = value", item.Value)
 	}
 }
 
 func TestStorageGet(t *testing.T) {
 	store := New()
 	store.store["key"] = item{
-		value:      "value",
-		expireTime: time.Now(),
+		Value:      "value",
+		ExpireTime: time.Now(),
 	}
 
 	v := store.Get("key")
 
-	if v["key"].value != "value" {
-		t.Errorf("store.Get(\"key\") = %s, want = value", v["key"].value)
+	if v["key"].Value != "value" {
+		t.Errorf("store.Get(\"key\") = %s, want = value", v["key"].Value)
 	}
 }
 
@@ -34,8 +34,8 @@ func TestStorageGetOnNotExists(t *testing.T) {
 	store := New()
 	v := store.Get("key")
 
-	if v["key"].value != "" {
-		t.Errorf("store.Get(\"key\") = %s, want = \"\"", v["key"].value)
+	if v["key"].Value != "" {
+		t.Errorf("store.Get(\"key\") = %s, want = \"\"", v["key"].Value)
 	}
 }
 
@@ -43,8 +43,8 @@ func TestStorageDel(t *testing.T) {
 	store := New()
 	now := time.Now()
 	store.store["key"] = item{
-		value:      "value",
-		expireTime: now,
+		Value:      "value",
+		ExpireTime: now,
 	}
 
 	store.Del("key")
@@ -58,8 +58,8 @@ func TestStorageExists(t *testing.T) {
 	store := New()
 	now := time.Now()
 	store.store["key"] = item{
-		value:      "value",
-		expireTime: now,
+		Value:      "value",
+		ExpireTime: now,
 	}
 
 	tmp := store.Exists("key")
@@ -79,8 +79,8 @@ func TestStorageDump(t *testing.T) {
 
 	tmp := store.Dump()
 
-	if tmp["key"].value != "value" {
-		t.Errorf("store.Dump() with key = key, get = %s, want = value", tmp["key"].value)
+	if tmp["key"].Value != "value" {
+		t.Errorf("store.Dump() with key = key, get = %s, want = value", tmp["key"].Value)
 	}
 
 	tmp["key"] = item{
@@ -88,7 +88,7 @@ func TestStorageDump(t *testing.T) {
 		now,
 	}
 
-	if store.store["key"].value == "v" {
+	if store.store["key"].Value == "v" {
 		t.Errorf("store.Dump() change value by key, changed original")
 	}
 }
