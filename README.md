@@ -15,6 +15,9 @@ If all file, Sara say HI
 `SET key value`
 Set value of key
 
+`SET key value EX ttl`
+Set value for key with time to life. Janitor goroutine clean expired keys every 200ms
+
 `GET key`
 Return value of key, if key not exists return `(none)`
 
