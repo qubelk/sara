@@ -64,6 +64,10 @@ func Handler(conn net.Conn, store *storage.Storage) {
 				}
 
 				ttl = time.Duration(seconds) * time.Second
+			} else if len(args) >= 3 {
+				writer.WriteString("Err: Expect 2 args for SET command, without ttl specifier\n")
+				writer.Flush()
+				break
 			}
 
 			store.Set(args[0], args[1], ttl)
