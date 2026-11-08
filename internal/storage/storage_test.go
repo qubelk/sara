@@ -1,24 +1,32 @@
 package storage
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestStorageSet(t *testing.T) {
 	store := New()
-	store.Set("key", "value")
-	v := store.store["key"]
+	store.Set("key", "value", 0)
 
-	if v != "value" {
-		t.Errorf("store.Set(\"test\", \"value\"), get from store = %s, want = value", v)
+	item := store.store["key"]
+
+	if item.Value != "value" {
+		t.Errorf("store.Set(\"test\", \"value\"), get from store = %s, want = value", item.Value)
 	}
 }
 
 func TestStorageGet(t *testing.T) {
 	store := New()
-	store.store["key"] = "value"
+	store.store["key"] = item{
+		Value:      "value",
+		ExpireTime: time.Now(),
+	}
+
 	v := store.Get("key")
 
-	if v["key"] != "value" {
-		t.Errorf("store.Get(\"key\") = %s, want = value", v)
+	if v["key"].Value != "value" {
+		t.Errorf("store.Get(\"key\") = %s, want = value", v["key"].Value)
 	}
 }
 
@@ -26,14 +34,19 @@ func TestStorageGetOnNotExists(t *testing.T) {
 	store := New()
 	v := store.Get("key")
 
-	if v["key"] != "" {
-		t.Errorf("store.Get(\"key\") = %s, want = \"\"", v)
+	if v["key"].Value != "" {
+		t.Errorf("store.Get(\"key\") = %s, want = \"\"", v["key"].Value)
 	}
 }
 
 func TestStorageDel(t *testing.T) {
 	store := New()
-	store.store["key"] = "value"
+	now := time.Now()
+	store.store["key"] = item{
+		Value:      "value",
+		ExpireTime: now,
+	}
+
 	store.Del("key")
 
 	if len(store.store) > 0 {
@@ -43,7 +56,11 @@ func TestStorageDel(t *testing.T) {
 
 func TestStorageExists(t *testing.T) {
 	store := New()
-	store.store["key"] = "value"
+	now := time.Now()
+	store.store["key"] = item{
+		Value:      "value",
+		ExpireTime: now,
+	}
 
 	tmp := store.Exists("key")
 
@@ -54,16 +71,24 @@ func TestStorageExists(t *testing.T) {
 
 func TestStorageDump(t *testing.T) {
 	store := New()
-	store.store["key"] = "value"
+	now := time.Now()
+	store.store["key"] = item{
+		"value",
+		now,
+	}
 
 	tmp := store.Dump()
 
-	if tmp["key"] != "value" {
-		t.Errorf("store.Dump() with key = key, get = %s, want = value", tmp["key"])
+	if tmp["key"].Value != "value" {
+		t.Errorf("store.Dump() with key = key, get = %s, want = value", tmp["key"].Value)
 	}
 
-	tmp["key"] = "v"
-	if store.store["key"] == "v" {
+	tmp["key"] = item{
+		"v",
+		now,
+	}
+
+	if store.store["key"].Value == "v" {
 		t.Errorf("store.Dump() change value by key, changed original")
 	}
 }
