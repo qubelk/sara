@@ -17,9 +17,22 @@ type Storage struct {
 }
 
 func New() *Storage {
-	return &Storage{
+	s := &Storage{
 		store: make(map[string]item),
 		mtx:   sync.RWMutex{},
+	}
+
+	go s.janitor(200 * time.Millisecond)
+
+	return s
+}
+
+func (s *Storage) janitor(interval time.Duration) {
+	t := time.NewTicker(interval)
+	defer t.Stop()
+
+	for range t.C {
+		s.CleanAllExpired()
 	}
 }
 
@@ -88,4 +101,17 @@ func (s *Storage) Dump() map[string]item {
 	maps.Copy(tmp, s.store)
 
 	return tmp
+}
+
+func (s *Storage) CleanAllExpired() {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	now := time.Now()
+
+	for k, v := range s.store {
+		if !v.ExpireTime.IsZero() && now.After(v.ExpireTime) {
+			delete(s.store, k)
+		}
+	}
 }
